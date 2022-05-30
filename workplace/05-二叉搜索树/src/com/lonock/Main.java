@@ -17,15 +17,17 @@ public class Main {
 				return o1-o2;
 			}
 		});
-		Integer data[] = new Integer[] {8,5,2,6,4,2,54,23,5,67,34};
+		Integer data[] = new Integer[] {8,5,2,6,1,2,54,23,5,67,34,33,35};
 		for(int a: data) {
 			t2.add(a);
 		}
 		
 		BinaryTrees.println(t2);
-		t2.postorder();
-		System.out.println("");
-		t2.inorderbystack();
+		t2.remove(23);
+//		t2.postorder();
+//		System.out.println(t2.successor(t2.node(6)));
+//		t2.inorderbystack();
 //	BinaryTrees.PrintStyle(t1);
+		BinaryTrees.println(t2);
 	}
 }

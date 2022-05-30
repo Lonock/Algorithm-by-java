@@ -8,27 +8,11 @@ import java.util.Stack;
 import javax.management.Query;
 
 import java.lang.Comparable;
+
+import com.lonock.BinaryTree.Node;
 import com.mj.printer.*;
 
-public class BinarySearchTree<E> implements BinaryTreeInfo{
-	private int size = 0;
-	private Node<E> root = null;
-	private Comparator<E> comparator;
-	
-	private static class Node<E> {
-		E elementE;
-		Node<E> left;
-		Node<E> right;
-		Node<E> parent;
-		
-		public Node(E element){
-			elementE = element;
-		}
-		public Node(E element, Node<E> head){
-			elementE = element;
-			this.parent = head;
-		}
-	}
+public class BinarySearchTree<E> extends BinaryTree<E>{
 	
 	public BinarySearchTree(){
 
@@ -38,21 +22,12 @@ public class BinarySearchTree<E> implements BinaryTreeInfo{
 		comparator = com;
 	}
 	
-	public int size() {
-		return size;
-	}
-	
-	public boolean empty() {
-		return size == 0;
-	}
-	
-	
-	
 	public void add(E element) {
 		Node<E> node = root;
 		if(node == null) {
-			root = new Node<E>(element);
+			root = createNode(element, null);
 			size++;
+			afterAdd(node);
 			return;
 		}
 		
@@ -60,182 +35,74 @@ public class BinarySearchTree<E> implements BinaryTreeInfo{
 			int cmp = compare(element, node.elementE);
 			if(cmp < 0) {
 				if(node.left == null) {
-					node.left = new Node<E>(element, node);
+					node.left = createNode(element,node.parent);
 					size++;
+					afterAdd(node);
 					return;
 				}
 				node = node.left;
 			}else if(cmp > 0) {
 				if(node.right == null) {
-					node.right = new Node<E>(element, node);
+					node.right = createNode(element,node.parent);
 					size++;
+					afterAdd(node);
 					return;
 				}
 				node = node.right;
 			}else {
+				afterAdd(node);
 				return;
 			}
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
-	private int compare(E e1,E e2) {
-		if(comparator != null) {
-			return comparator.compare(e1,e2);
-		}
-		return ((Comparable<E>) e1).compareTo(e2);
-	}
-	
-	public void preorder() {
-		preorder(root);
-	}
-	
-	public void preorderbystack() {
-		preorderbystack(root);
-	}
-	
-	public void inorder() {
-		inorder(root);
-	}
-	
-	public void inorderbystack() {
-		inorderbystack(root);
-	}
-	
-	public void postorder() {
-		postorder(root);
-	}
-	
-	public void floororder() {
-		floororder(root);
-	}
-	
-	public void preorder(Node<E> node) {
-		if(node == null)
-			return;
+	protected void afterAdd(Node<E> node) {
 		
-		System.out.print(node.elementE+"_");
-//		System.out.print("_");
-		preorder(node.left);
-		preorder(node.right);
 	}
 	
-	public void preorderbystack(Node<E> node) {
-		if(node == null)
-			return;
-		
-		Stack<Node<E>> st = new Stack<>();
-		st.push(node);
-		
-		while(!st.empty()) {
-			node = st.pop();
-			System.out.print(node.elementE + "_");
-			if(node.right!=null)
-				st.push(node.right);
-			if(node.left!=null)
-				st.push(node.left);
-		}
-	}
-	
-	public void inorder(Node<E> node) {
-		if(node == null)
-			return;
-		
-		inorder(node.left);
-		System.out.print(node.elementE+"_");
-		inorder(node.right);
-	}
-
-	public void inorderbystack(Node<E> node) {
-		if(node == null)
-			return;
-		Stack<Node<E>> st = new Stack<>();
-		while(!st.empty() || node!=null) {
-			while(node!=null ) {
-				st.push(node);
+	public Node<E> node(E element) {
+		Node<E> node = root;
+		while(node!=null) {
+			if(comparator.compare(element, node.elementE) > 0)
+				node = node.right;
+			else if(comparator.compare(element, node.elementE) < 0)
 				node = node.left;
-			}
-			node = st.pop();
-			System.out.print(node.elementE + "_");
-			node = node.right;
+			else
+				return node;
 		}
+		return null;
 	}
 	
-	public void postorder(Node<E> node) {
-		if(node == null)
-			return;
+	public E remove(E element) {
+		Node<E> node = node(element);
+		if(node == null) return null;
 		
-		postorder(node.left);
-		postorder(node.right);
-		System.out.print(node.elementE+"_");
-	}
-
-	public void postbystack(Node<E> node) {
-		if(node == null)
-			return;
-		Stack<Node<E>> st = new Stack<>();
-		while(!st.empty() || node!=null) {
-			while(node!=null ) {
-				st.push(node);
-				node = node.left;
-			}
-			node = st.pop();
-			System.out.print(node.elementE + "_");
-			node = node.right;
+		if(node.leavescount() == 2) {//2个叶子
+			Node<E> prenode = predecessor(node);
+			node.elementE = prenode.elementE;
+			node = prenode;
 		}
-	}
-	
-	public void floororder(Node<E> node) {
-		if(node == null)
-			return;
 		
-		Queue<Node<E>> l1 = new LinkedList<>();
-		l1.offer(node);
-		while(!l1.isEmpty()) {
-			node = l1.poll();
-			System.out.print(node.elementE+"_");
-			
-			if(node.left != null) {
-				l1.offer(node.left);
-			}
-			if(node.right != null) {
-				l1.offer(node.right);
-			}
+		if(node.leavescount() == 1) {
+			Node<E> leafNode = node.left != null ? node.left : node.right;
+//			node.elementE = leafNode.elementE;
+//			node = leafNode;
+			leafNode.parent = node.parent;
+			if(node.parent == null) root = null;
+			if(node == node.parent.left) 
+				node.parent.left = leafNode;
+			else
+				node.parent.right = leafNode;
 		}
-	}
-	
-	public void remove() {
 		
-	}
-	
-	public boolean contain() {
+		if(node.leavescount() == 0) {
+			if(node.parent == null) root = null;
+			if(node == node.parent.left) 
+				node.parent.left = null;
+			else
+				node.parent.right = null;
+		}
+		return element;
 		
-		return true;
-	}
-
-	
-	
-	@Override
-	public Object root() {
-		// TODO Auto-generated method stub
-		return root;
-	}
-
-	@Override
-	public Object left(Object node) {
-		// TODO Auto-generated method stub
-		return ((Node<E>) node).left;
-	}
-
-	@Override
-	public Object right(Object node) {
-		// TODO Auto-generated method stub
-		return ((Node<E>) node).right;
-	}
-
-	@Override
-	public Object string(Object node) {
-		// TODO Auto-generated method stub
-		return ((Node<E>) node).elementE;
 	}
 }

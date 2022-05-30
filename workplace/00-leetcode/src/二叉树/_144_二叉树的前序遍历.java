@@ -18,7 +18,7 @@ public class _144_二叉树的前序遍历 {
 		preorder(root.right);
 		return root;
 	}
-	
+
     public List<Integer> preorderTraversal(TreeNode root) {
     	preorder(root);
     	
