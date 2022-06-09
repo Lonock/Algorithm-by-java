@@ -27,7 +27,7 @@ public class BinarySearchTree<E> extends BinaryTree<E>{
 		if(node == null) {
 			root = createNode(element, null);
 			size++;
-			afterAdd(node);
+			afterAdd(root);
 			return;
 		}
 		
@@ -35,28 +35,32 @@ public class BinarySearchTree<E> extends BinaryTree<E>{
 			int cmp = compare(element, node.elementE);
 			if(cmp < 0) {
 				if(node.left == null) {
-					node.left = createNode(element,node.parent);
+					node.left = createNode(element,node);
 					size++;
-					afterAdd(node);
+					afterAdd(node.left);
 					return;
 				}
 				node = node.left;
 			}else if(cmp > 0) {
 				if(node.right == null) {
-					node.right = createNode(element,node.parent);
+					node.right = createNode(element,node);
 					size++;
-					afterAdd(node);
+					afterAdd(node.right);
 					return;
 				}
 				node = node.right;
 			}else {
-				afterAdd(node);
+//				afterAdd(node);
 				return;
 			}
 		}
 	}
 	
 	protected void afterAdd(Node<E> node) {
+		
+	}
+	
+	protected void afterRemove(Node<E> node) {
 		
 	}
 	
@@ -102,6 +106,8 @@ public class BinarySearchTree<E> extends BinaryTree<E>{
 			else
 				node.parent.right = null;
 		}
+		
+		afterRemove(node);
 		return element;
 		
 	}

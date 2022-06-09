@@ -13,7 +13,7 @@ public class AVLTree<E> extends BinarySearchTree<E>{
 		public AVLNode(E element, Node<E> parent) {
 			super(element,parent);
 		}
-		int height;
+		private int height = 1;
 		
 		public int balanceFactor() {
 			int leftHeight = left == null? 0 : ((AVLNode<E>)left).height;
@@ -25,13 +25,23 @@ public class AVLTree<E> extends BinarySearchTree<E>{
 			int leftHeight = left == null? 0 : ((AVLNode<E>)left).height;
 			int rightHeight = right == null? 0 : ((AVLNode<E>)right).height;
 			int maxHeight = Math.max(leftHeight, rightHeight);
+			height = maxHeight + 1;
 		}
 		
 		public Node<E> tallerChild() {
 			int leftHeight = left == null? 0 : ((AVLNode<E>)left).height;
 			int rightHeight = right == null? 0 : ((AVLNode<E>)right).height;
-			if(leftHeight < rightHeight) return left;
+			if(leftHeight > rightHeight) return left;
 			else return right;
+		}
+		
+		@Override
+		public String toString() {
+			// TODO Auto-generated method stub
+			if(parent != null)
+				return elementE + "(" + parent.elementE + ")" + "_" + height;
+			else
+				return elementE + "(" + "null" + ")" + "_" + height;
 		}
 	}
 	
@@ -54,27 +64,59 @@ public class AVLTree<E> extends BinarySearchTree<E>{
 		Node<E> node = ((AVLNode<E>)grand).tallerChild();
 		if(parent.isLeftChild()) {//L
 			if(node.isLeftChild()) {//LL
-				rotateleft(grand);
-			}else {//LR
-				rotateright(parent);
-				rotateleft(grand);
-			}
-		}else {//R
-			if(node.isLeftChild()) {//RL
 				rotateright(grand);
-			}else {//RR
+			}else {//LR
 				rotateleft(parent);
 				rotateright(grand);
+			}
+		}else {//R
+			if(node.isRightChild()) {//RR
+				rotateleft(grand);
+			}else {//RL
+				rotateright(parent);
+				rotateleft(grand);
 			}
 		}
 	}
 	
-	private void rotateleft(Node<E> node) {
-		
+	private void rotateleft(Node<E> grand) {
+		Node<E> parent = grand.right;
+		if(grand.isLeftChild()) {
+			grand.parent.left = parent;
+		}else if(grand.isRightChild()) {
+			grand.parent.right = parent;
+		}else {
+			root = parent;
+		}
+		parent.parent = grand.parent;
+		grand.right = parent.left;
+		if(parent.left != null)
+			parent.left.parent = grand;
+		parent.left = grand;
+		grand.parent = parent;
+
+		updateHeight(grand);
+		updateHeight(parent);
 	}
 	
-	private void rotateright(Node<E> node) {
-		
+	private void rotateright(Node<E> grand) {
+		Node<E> parent = grand.left;
+		if(grand.isLeftChild()) {
+			grand.parent.left = parent;
+		}else if(grand.isRightChild()){
+			grand.parent.right = parent;
+		}else {
+			root = parent;
+		}
+		parent.parent = grand.parent;
+		grand.left = parent.right;
+		if(grand.left != null)
+			grand.left.parent = grand;
+		parent.right = grand;
+		grand.parent = parent;
+
+		updateHeight(grand);
+		updateHeight(parent);
 	}
 	
 	public AVLTree() {
@@ -86,6 +128,18 @@ public class AVLTree<E> extends BinarySearchTree<E>{
 	}
 	
 	protected void afterAdd(Node<E> node) {
+		while((node = node.parent) != null) {
+			if(isBalanced(node)) {
+				updateHeight(node);
+			}else {
+				rebanlance(node);
+				break;
+			}
+		}
+		
+	}
+	
+	protected void afterRemove(Node<E> node) {
 		while((node = node.parent) != null) {
 			if(isBalanced(node)) {
 				updateHeight(node);

@@ -36,7 +36,7 @@ public class BinaryTree<E> implements BinaryTreeInfo{
 		@Override
 		public String toString() {
 			// TODO Auto-generated method stub
-			return elementE+"";
+			return elementE+"(" + parent.elementE +")";
 		}
 		
 		public boolean isLeftChild() {
@@ -262,6 +262,6 @@ public class BinaryTree<E> implements BinaryTreeInfo{
 	@Override
 	public Object string(Object node) {
 		// TODO Auto-generated method stub
-		return ((Node<E>) node).elementE;
+		return ((Node<E>) node);
 	}
 }
