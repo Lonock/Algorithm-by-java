@@ -10,6 +10,8 @@ public class Main {
 		}
 		_203_移除链表元素 b = new _203_移除链表元素();
 		b.removeElements(a, 0);
+//		System.out.println("test");
+		
 	}
 
 }
